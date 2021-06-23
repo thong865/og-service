@@ -1,13 +1,39 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	Routers "MS/routes"
+	"fmt"
+	"os"
 
+	"github.com/joho/godotenv"
+)
+
+//Execution starts from main function
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run() // listen and serve on 0.0.0.0:8080
+
+	e := godotenv.Load()
+	if e != nil {
+		fmt.Print(e)
+	}
+	r := Routers.SetupRouter()
+
+	port := os.Getenv("port")
+
+	// For run on requested port
+	if len(os.Args) > 1 {
+		reqPort := os.Args[1]
+		if reqPort != "" {
+			port = reqPort
+		}
+	}
+
+	if port == "" {
+		port = "8080" //localhost
+	}
+	type Job interface {
+		Run()
+	}
+
+	r.Run(":" + port)
+
 }
