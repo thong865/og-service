@@ -3,7 +3,7 @@ package v1services
 import (
 	u "MS/apiHelpers"
 	"MS/models"
-	res "MS/resources/api/v1"
+	res "MS/resources/v1"
 )
 
 //UserService struct

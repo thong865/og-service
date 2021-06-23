@@ -2,7 +2,7 @@ package v1
 
 import (
 	u "MS/apiHelpers"
-	vserv "MS/services"
+	vserv "MS/services/api"
 	"encoding/json"
 
 	"github.com/gin-gonic/gin"
