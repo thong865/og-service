@@ -34,6 +34,9 @@ func SetupRouter() *gin.Engine {
 	v1.Use(middlewares.UserMiddlewares())
 	{
 		v1.POST("user-list", apiControllerV1.UserList)
+		v1.GET("/test", apiControllerV1.GetList)
+		v1.POST("/login", apiControllerV1.SVLOTLOGIN)
+
 	}
 
 	return r
