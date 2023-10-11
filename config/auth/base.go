@@ -33,7 +33,8 @@ func Attemp(username string, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	token, err := GenarateAccessToken(string(u.ID))
+	fmt.Println(u)
+	token, err := GenarateAccessToken(string(username))
 	if err != nil {
 		return "", err
 	}

@@ -34,8 +34,7 @@ func (u *User) BeforeSave() error {
 	if err != nil {
 		return err
 	}
-	hashedPassword := p
-	u.Password = string(hashedPassword)
+	u.Password = string(p)
 
 	return nil
 

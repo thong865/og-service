@@ -4,6 +4,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/base64"
+	"io"
 )
 
 var (
@@ -14,51 +16,36 @@ var (
 )
 
 func Encrypt(plaintext string) (string, error) {
-	aes, err := aes.NewCipher([]byte(secretKey))
+	byteMsg := []byte(plaintext)
+	// aes, err := aes.NewCipher([]byte(secretKey))
+	block, err := aes.NewCipher([]byte(secretKey))
 	if err != nil {
 		panic(err)
 	}
-
-	gcm, err := cipher.NewGCM(aes)
-	if err != nil {
+	cipherText := make([]byte, aes.BlockSize+len(byteMsg))
+	iv := cipherText[:aes.BlockSize]
+	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
 		panic(err)
 	}
-
-	// We need a 12-byte nonce for GCM (modifiable if you use cipher.NewGCMWithNonceSize())
-	// A nonce should always be randomly generated for every encryption.
-	nonce := make([]byte, gcm.NonceSize())
-	_, err = rand.Read(nonce)
-	if err != nil {
-		panic(err)
-	}
-
-	// ciphertext here is actually nonce+ciphertext
-	// So that when we decrypt, just knowing the nonce size
-	// is enough to separate it from the ciphertext.
-	// ciphertext := gcm.Seal(nonce, nonce, []byte(plaintext), nil)
-
-	return string(plaintext), nil
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(cipherText[aes.BlockSize:], byteMsg)
+	return base64.StdEncoding.EncodeToString(cipherText), nil
 }
-func decrypt(ciphertext string) string {
-	aes, err := aes.NewCipher([]byte(secretKey))
+func Decrypt(ciphertext string) (string, error) {
+	cipherText, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		panic(err)
 	}
-
-	gcm, err := cipher.NewGCM(aes)
+	block, err := aes.NewCipher([]byte(secretKey))
 	if err != nil {
 		panic(err)
 	}
-
-	// Since we know the ciphertext is actually nonce+ciphertext
-	// And len(nonce) == NonceSize(). We can separate the two.
-	nonceSize := gcm.NonceSize()
-	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-
-	plaintext, err := gcm.Open(nil, []byte(nonce), []byte(ciphertext), nil)
-	if err != nil {
+	if len(cipherText) < aes.BlockSize {
 		panic(err)
 	}
-
-	return string(plaintext)
+	iv := cipherText[:aes.BlockSize]
+	cipherText = cipherText[aes.BlockSize:]
+	stream := cipher.NewCFBDecrypter(block, iv)
+	stream.XORKeyStream(cipherText, cipherText)
+	return string(cipherText), nil
 }
