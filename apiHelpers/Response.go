@@ -7,8 +7,11 @@ import (
 
 //ResponseData structure
 type ResponseData struct {
-	Data interface{} `json:"data"`
-	Meta interface{} `json:"meta"`
+	Error   bool        `json:"error"`
+	Code    string      `json:"code"`
+	Message string      `json:"message"`
+	Meta    interface{} `json:"meta"`
+	Data    interface{} `json:"data"`
 }
 
 //Message returns map data
